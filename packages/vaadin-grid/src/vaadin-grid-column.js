@@ -168,11 +168,11 @@ export const ColumnBaseMixin = (superClass) =>
       this._headerTemplate && (this._headerTemplate.templatizer._grid = this._grid);
       this._footerTemplate && (this._footerTemplate.templatizer._grid = this._grid);
 
-      this._templateObserver.flush();
-      if (!this._bodyTemplate) {
-        // The observer might not have triggered if the tag is empty. Run manually.
-        this._templateObserver.callback();
-      }
+      // this._templateObserver.flush();
+      // if (!this._bodyTemplate) {
+      //   // The observer might not have triggered if the tag is empty. Run manually.
+      //   this._templateObserver.callback();
+      // }
 
       requestAnimationFrame(() => {
         this._allCells.forEach((cell) => {
@@ -198,6 +198,15 @@ export const ColumnBaseMixin = (superClass) =>
       });
 
       this._gridValue = undefined;
+    }
+
+    /** @protected */
+    ready() {
+      super.ready();
+
+      if (window.Vaadin && window.Vaadin.templateRendererCallback) {
+        window.Vaadin.templateRendererCallback(this);
+      }
     }
 
     /**
@@ -241,11 +250,11 @@ export const ColumnBaseMixin = (superClass) =>
     constructor() {
       super();
 
-      this._templateObserver = new FlattenedNodesObserver(this, () => {
-        this._headerTemplate = this._prepareHeaderTemplate();
-        this._footerTemplate = this._prepareFooterTemplate();
-        this._bodyTemplate = this._prepareBodyTemplate();
-      });
+      // this._templateObserver = new FlattenedNodesObserver(this, () => {
+      //   this._headerTemplate = this._prepareHeaderTemplate();
+      //   this._footerTemplate = this._prepareFooterTemplate();
+      //   this._bodyTemplate = this._prepareBodyTemplate();
+      // });
     }
 
     /**

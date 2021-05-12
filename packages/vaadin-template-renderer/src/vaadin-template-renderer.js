@@ -1,8 +1,11 @@
 import './vaadin-template-renderer-templatizer.js';
-import { Templatizer } from './vaadin-template-renderer-templatizer.js';
+import './vaadin-template-renderer-grid-templatizer.js';
 
-function createRenderer(template) {
-  const templatizer = Templatizer.create(template);
+import { Templatizer } from './vaadin-template-renderer-templatizer.js';
+// import { GridTemplatizer } from './vaadin-template-renderer-grid-templatizer.js';
+
+function createRenderer(component, template, TemplatizerClass = Templatizer) {
+  const templatizer = TemplatizerClass.create(component, template);
 
   return (root, _owner, model) => {
     template.__templatizer = templatizer;
@@ -11,7 +14,27 @@ function createRenderer(template) {
 }
 
 function processTemplate(component, template) {
-  component.renderer = createRenderer(template);
+  if (template.classList.contains('header')) {
+    component.headerRenderer = createRenderer(component, template);
+    return;
+  }
+
+  if (template.classList.contains('footer')) {
+    component.footerRenderer = createRenderer(component, template);
+    return;
+  }
+
+  // if (template.parentNode.matches('vaadin-grid-column')) {
+  //   component.renderer = createRenderer(component, template, GridTemplatizer);
+  //   return;
+  // }
+
+  // if (template.classList.contains('row-details')) {
+  //   component.rowDetailsRenderer = createRenderer(component, template, GridTemplatizer);
+  //   return;
+  // }
+
+  component.renderer = createRenderer(component, template);
 }
 
 function processTemplates(component) {

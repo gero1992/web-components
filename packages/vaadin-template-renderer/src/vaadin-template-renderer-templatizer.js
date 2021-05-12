@@ -2,7 +2,7 @@ import { PolymerElement } from '@polymer/polymer';
 import { templatize } from '@polymer/polymer/lib/utils/templatize';
 
 export class Templatizer extends PolymerElement {
-  static create(template) {
+  static create(_component, template) {
     const templatizer = new Templatizer();
     templatizer.__template = template;
     return templatizer;
