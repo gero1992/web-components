@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { click, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import { flushGrid, getCellContent, getRows, getRowCells } from './helpers.js';
+import { flushGrid, getCellContent, getRows, getRowCells, getPhysicalItems } from './helpers.js';
 import '../vaadin-grid.js';
 import '../vaadin-grid-filter.js';
 import '../vaadin-grid-sorter.js';
@@ -60,35 +60,34 @@ describe('array data provider', () => {
       expect(getContent(1, 0)).to.equal('baz');
     });
 
-    it('should be observed for shift', () => {
-      grid.unshift('items', {
-        name: {
-          first: 'a',
-          last: 'b'
-        }
-      });
-      expect(grid.size).to.equal(3);
+    it('should preprend an item', () => {
+      grid.items = [
+        {
+          name: {
+            first: 'a',
+            last: 'b'
+          }
+        },
+        ...grid.items
+      ];
+      expect(getPhysicalItems(grid).length).to.equal(3);
       expect(getContent(0, 0)).to.equal('a');
     });
 
-    it('should be observed for mutation', () => {
-      grid.set('items.0.name.first', 'new');
+    it('should mutate an item', () => {
+      const items = grid.items;
+      items[0].name.first = 'new';
+      grid.items = [...items];
       expect(getContent(0, 0)).to.equal('new');
     });
 
     it('should handle null', () => {
       grid.items = null;
-      expect(grid.size).to.equal(0);
+      expect(grid.dataProvider).not.to.be.ok;
     });
 
-    it('should set array data provider', () => {
-      expect(grid.dataProvider).to.equal(grid._arrayDataProvider);
-    });
-
-    it('should not override custom data provider', () => {
-      const ds = (grid.dataProvider = () => {});
-      grid.items = [1, 2, 3];
-      expect(grid.dataProvider).to.equal(ds);
+    it('should set an array data provider', () => {
+      expect(grid.dataProvider).to.be.ok;
     });
 
     it('should handle new array of same length', () => {

@@ -3,7 +3,14 @@ import sinon from 'sinon';
 import { fixtureSync, listenOnce } from '@vaadin/testing-helpers';
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import { flush } from '@polymer/polymer/lib/utils/flush.js';
-import { flushGrid, getBodyCellContent, getHeaderCellContent, scrollToEnd, getVisibleItems } from './helpers.js';
+import {
+  flushGrid,
+  getBodyCellContent,
+  getHeaderCellContent,
+  scrollToEnd,
+  getVisibleItems,
+  getPhysicalItems
+} from './helpers.js';
 import '../vaadin-grid.js';
 import '../vaadin-grid-filter.js';
 import '../vaadin-grid-filter-column.js';
@@ -291,12 +298,13 @@ describe('array data provider', () => {
     parentNode.appendChild(grid);
 
     expect(Object.keys(grid._cache.items).length).to.equal(3);
+    expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('baz');
   });
 
   it('should sort filtered items', () => {
     grid._filters[1].value = 'r';
     grid.querySelector('vaadin-grid-sorter').direction = 'asc';
-    expect(grid.size).to.equal(2);
+    expect(getPhysicalItems(grid).length).to.equal(2);
     expect(getBodyCellContent(grid, 0, 0).innerText).to.equal('bar');
     expect(getBodyCellContent(grid, 1, 0).innerText).to.equal('foo');
   });

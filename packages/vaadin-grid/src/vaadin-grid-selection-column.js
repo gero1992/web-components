@@ -214,7 +214,11 @@ class GridSelectionColumnElement extends GridColumnElement {
       return;
     }
 
-    this._grid.selectedItems = selectAll && Array.isArray(this._grid.items) ? this._grid._filter(this._grid.items) : [];
+    if (this.__gridUsesArrayDataProvider() && selectAll) {
+      this.__withFilteredItemsArray((items) => (this._grid.selectedItems = items));
+    } else {
+      this._grid.selectedItems = [];
+    }
   }
 
   /**
@@ -255,16 +259,20 @@ class GridSelectionColumnElement extends GridColumnElement {
   /** @private */
   _onSelectedItemsChanged() {
     this._selectAllChangeLock = true;
-    if (Array.isArray(this._grid.items)) {
+    if (this.__gridUsesArrayDataProvider()) {
       if (!this._grid.selectedItems.length) {
         this.selectAll = false;
         this._indeterminate = false;
-      } else if (this._arrayContains(this._grid.selectedItems, this._grid._filter(this._grid.items))) {
-        this.selectAll = true;
-        this._indeterminate = false;
       } else {
-        this.selectAll = false;
-        this._indeterminate = true;
+        this.__withFilteredItemsArray((items) => {
+          if (this._arrayContains(this._grid.selectedItems, items)) {
+            this.selectAll = true;
+            this._indeterminate = false;
+          } else {
+            this.selectAll = false;
+            this._indeterminate = true;
+          }
+        });
       }
     }
     this._selectAllChangeLock = false;
@@ -272,7 +280,32 @@ class GridSelectionColumnElement extends GridColumnElement {
 
   /** @private */
   _onDataProviderChanged() {
-    this._selectAllHidden = !Array.isArray(this._grid.items);
+    this._selectAllHidden = !this.__gridUsesArrayDataProvider();
+  }
+
+  /**
+   * Assuming the grid uses an array data provider, fetches all the filtered items
+   * from it and invokes the callback with the resulting array.
+   *
+   * @private
+   **/
+  __withFilteredItemsArray(callback) {
+    const params = {
+      page: 0,
+      pageSize: this._grid.items.length,
+      sortOrders: [],
+      filters: this._grid._mapFilters()
+    };
+    this._grid.dataProvider(params, (items) => callback(items));
+  }
+
+  /**
+   * Checks whether the grid's dataProvider is an array data provider
+   *
+   * @private
+   **/
+  __gridUsesArrayDataProvider() {
+    return this._grid.dataProvider && this._grid.dataProvider.__arrayDataProvider;
   }
 }
 
